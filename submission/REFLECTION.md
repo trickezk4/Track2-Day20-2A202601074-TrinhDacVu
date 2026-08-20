@@ -37,9 +37,9 @@
 > Paste bảng từ `benchmarks/01-quickstart-results.md` (`make bench` tự sinh).
 
 | Quantization | Size (GB) | Load (ms) | TTFT P50/P95 (ms) | TPOT P50/P95 (ms) | E2E P50/P95/P99 (ms) | Decode (tok/s) |
-|---|--:|--:|--:|--:|--:|--:|
-| Q4_K_M | 0.50 | 104415 | 393 / 580 | 9.7 / 17.0 | 993 / 1649 / 1649 | 103.5 |
-| UD-Q2_K_XL | 0.39 | 6118 | 446 / 761 | 11.9 / 16.4 | 1298 / 1715 / 1715 | 84.3 |
+| ------------ | --------: | --------: | ----------------: | ----------------: | -------------------: | -------------: |
+| Q4_K_M       |      0.50 |    104415 |         393 / 580 |        9.7 / 17.0 |    993 / 1649 / 1649 |          103.5 |
+| UD-Q2_K_XL   |      0.39 |      6118 |         446 / 761 |       11.9 / 16.4 |   1298 / 1715 / 1715 |           84.3 |
 
 **Quan sát** (≤ 60 chữ): Bản 2-bit (UD-Q2_K_XL) không đáng dùng. Nó chậm hơn bản 4-bit 1.23 lần (84.3 so với 103.5 tok/s). Vì model Qwen3.5 0.8B rất nhỏ nằm trọn trong VRAM nên không nghẽn băng thông bộ nhớ mà nghẽn tính toán. Chi phí giải nén ma trận của 2-bit tốn tài nguyên GPU nhiều hơn.
 
@@ -49,10 +49,10 @@
 
 > Từ `benchmarks/02-server-results.md` (`make load-report`).
 
-| Users | RPS | P50 (ms) | P95 (ms) | P99 (ms) | Eff. concurrency | Failures |
-|--:|--:|--:|--:|--:|--:|--:|
-| 10 | 1.67 | 4500 | 9600 | 11000 | 8.4 | 10.4% |
-| 50 | 1.45 | 30000 | 38000 | 40000 | 38.3 | 0.0% |
+| Users |  RPS | P50 (ms) | P95 (ms) | P99 (ms) | Eff. concurrency | Failures |
+| ----: | ---: | -------: | -------: | -------: | ---------------: | -------: |
+|    10 | 1.67 |     4500 |     9600 |    11000 |              8.4 |    10.4% |
+|    50 | 1.45 |    30000 |    38000 |    40000 |             38.3 |     0.0% |
 
 - **Offered load tăng 5×, throughput thực tăng:** 0.87×
 - **P95 tăng:** 3.96×
@@ -68,13 +68,13 @@
 
 > Từ `make pipeline`. Nói thật cái nào real, cái nào stub — stub **không** mất điểm.
 
-| Day | Piece | Real hay stub? |
-|---|---|---|
-| N16 Cloud/IaC | stub |
-| N17 Data pipeline | stub |
-| N18 Lakehouse | stub |
-| N19 Vector + features | stub |
-| N20 Serving | `llama-server` | real |
+| Day                   | Piece            | Real hay stub? |
+| --------------------- | ---------------- | -------------- |
+| N16 Cloud/IaC         | `LocalStack`   | stub           |
+| N17 Data pipeline     | `dlt`          | stub           |
+| N18 Lakehouse         | `DuckDB`       | stub           |
+| N19 Vector + features | `SQLite`       | stub           |
+| N20 Serving           | `llama-server` | real           |
 
 **Latency split** (mean của 3 query, từ output của `pipeline.py`):
 
@@ -103,9 +103,8 @@ speedup: 1.23x
 
 **Tại sao nó work** (1–2 đoạn — đây là phần grader đọc kỹ nhất):
 
-Sự thay đổi từ bản UD-Q2_K_XL (2-bit) lên Q4_K_M (4-bit) mang lại mức cải thiện hiệu năng rõ rệt (1.23x) dù dung lượng mô hình tăng từ 0.39 GB lên 0.50 GB. Hiện tượng này trái ngược với kỳ vọng thông thường (mô hình nhẹ hơn thì chạy nhanh hơn) nhưng hoàn toàn hợp lý trong điều kiện phần cứng và kích thước mô hình này.
-
-Vì mô hình Qwen3.5 0.8B cực kỳ nhỏ, nó được tải và chạy hoàn toàn trên VRAM của GPU GTX 1650 Ti (ngl=99) mà không bị giới hạn bởi băng thông bộ nhớ RAM (memory-bandwidth bound). Do đó, nút thắt chuyển sang năng lực tính toán và chi phí giải nén ma trận (dequantization overhead) trên các nhân CUDA. Bản nén 2-bit yêu cầu các phép toán giải nén/dịch bit phức tạp hơn để đưa về float16, tiêu tốn nhiều chu kỳ xử lý của GPU hơn là lượng truyền tải dữ liệu mà nó tiết kiệm được. Do đó, chuyển sang bản 4-bit giúp tăng tốc độ sinh token lên đáng kể.
+* Sự thay đổi từ bản UD-Q2_K_XL (2-bit) lên Q4_K_M (4-bit) mang lại mức cải thiện hiệu năng rõ rệt (1.23x) dù dung lượng mô hình tăng từ 0.39 GB lên 0.50 GB. Hiện tượng này trái ngược với kỳ vọng thông thường (mô hình nhẹ hơn thì chạy nhanh hơn) nhưng hoàn toàn hợp lý trong điều kiện phần cứng và kích thước mô hình này.
+* Vì mô hình Qwen3.5 0.8B cực kỳ nhỏ, nó được tải và chạy hoàn toàn trên VRAM của GPU GTX 1650 Ti (ngl=99) mà không bị giới hạn bởi băng thông bộ nhớ RAM (memory-bandwidth bound). Do đó, nút thắt chuyển sang năng lực tính toán và chi phí giải nén ma trận (dequantization overhead) trên các nhân CUDA. Bản nén 2-bit yêu cầu các phép toán giải nén/dịch bit phức tạp hơn để đưa về float16, tiêu tốn nhiều chu kỳ xử lý của GPU hơn là lượng truyền tải dữ liệu mà nó tiết kiệm được. Do đó, chuyển sang bản 4-bit giúp tăng tốc độ sinh token lên đáng kể.
 
 ---
 

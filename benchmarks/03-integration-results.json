@@ -3,13 +3,13 @@
   "mean_ms": {
     "embed": 0.0,
     "retrieve": 0.1,
-    "llm": 3538.3,
-    "total": 3538.6
+    "llm": 4037.1,
+    "total": 4037.5
   },
   "results": [
     {
       "query": "Why is goodput more useful than raw throughput?",
-      "answer": "Based on the provided context, **Goodput** is more useful than raw throughput because it focuses on **SLOs (Service Level Objects)** by counting only requests that met their targets, whereas **Raw Throughput** ignores SLOs and only considers requests per second at saturation.\n\nThis distinction highlights that Goodput is designed to be more efficient and reliable for applications where the goal is to meet specific performance or reliability targets (SLOs) rather than maximizing instantaneous capacity.",
+      "answer": "Based on the context provided, **Goodput** is more useful than raw throughput because it focuses exclusively on the **requests per second (RPS)** that meet specific targets (TTFT and TPOT).\n\nThe context explicitly states that:\n1.  **Goodput** counts only requests per second that met the targets.\n2.  **Throughput at saturation** ignores SLOs (specifically the SLOs mentioned in the context).\n\nThis implies that while raw throughput measures total capacity, Goodput measures utilization relative to the strict SLOs defined by the targets. In a system where throughput ignores SLOs, Goodput provides a more accurate and useful metric for monitoring and scaling that adheres to the SLOs.",
       "contexts": [
         {
           "id": "goodput",
@@ -28,19 +28,19 @@
       "timings_ms": {
         "embed": 0.0,
         "retrieve": 0.1,
-        "llm": 3708.3,
-        "total": 3709.1
+        "llm": 4665.8,
+        "total": 4666.7
       },
       "server_timings": {
         "prompt_n": 4,
-        "prompt_ms": 185.902,
-        "predicted_n": 97,
-        "predicted_ms": 838.64
+        "prompt_ms": 279.792,
+        "predicted_n": 152,
+        "predicted_ms": 1338.813
       }
     },
     {
       "query": "What problem does PagedAttention actually solve?",
-      "answer": "PagedAttention solves the problem of **internal fragmentation** in GPU memory.\n\nBy storing the KV cache in non-contiguous pages, it prevents the wasted space that would otherwise be occupied by the internal fragmentation of contiguous memory blocks.",
+      "answer": "PagedAttention solves the problem of **internal fragmentation in GPU memory**.\n\nWhile the context mentions that it stores KV cache in non-contiguous pages to \"remove the internal fragmentation that wasted most GPU memory,\" it does not explicitly state the *result* of this removal (e.g., \"it allows for higher throughput\" or \"it reduces latency\"). However, in the context of the provided text, the solution to this specific memory fragmentation issue is to achieve **higher throughput** (or better utilization of available GPU memory) by moving the cache to non-contiguous pages.\n\nTherefore, the problem PagedAttention solves is **GPU memory fragmentation** (specifically internal fragmentation), and the mechanism used to resolve it is moving the cache to non-contiguous pages.",
       "contexts": [
         {
           "id": "paged",
@@ -59,19 +59,19 @@
       "timings_ms": {
         "embed": 0.0,
         "retrieve": 0.1,
-        "llm": 2960.5,
-        "total": 2960.7
+        "llm": 3979.6,
+        "total": 3979.7
       },
       "server_timings": {
         "prompt_n": 4,
-        "prompt_ms": 87.721,
-        "predicted_n": 47,
-        "predicted_ms": 478.427
+        "prompt_ms": 153.728,
+        "predicted_n": 153,
+        "predicted_ms": 1353.981
       }
     },
     {
       "query": "When does splitting prefill and decode help?",
-      "answer": "Splitting prefill and decode helps when **prefill is compute-bound and decode is memory-bound**, specifically to avoid the overhead of maintaining a large shared KV cache.\n\nAccording to the context, this optimization occurs because:\n1.  **Prefill** is compute-bound (requires significant processing power).\n2.  **Decode** is memory-bound (requires significant bandwidth).\n3.  **RadixAttention** uses a trie-based caching mechanism where keys are cached by token prefix. This allows the engine to skip the prefill step entirely for tokens that share a prefix.\n\nBy splitting these operations, the system can process compute-bound tasks first (prefill) and then handle memory-bound tasks (decode) in separate pools, effectively bypassing the shared cache that would otherwise be required for a full batch.",
+      "answer": "Splitting prefill and decode helps when **prefill is compute-bound and decode is memory-bound**.\n\nThis is because the context explicitly states that prefill is compute-bound (requiring significant CPU work) and decode is memory-bound (requiring significant memory bandwidth). By separating these operations into different pools, the system can optimize for these specific constraints:\n*   **Prefill**: Can be split to utilize compute resources more effectively.\n*   **Decode**: Can be split to utilize memory bandwidth more effectively.",
       "contexts": [
         {
           "id": "disagg",
@@ -90,14 +90,14 @@
       "timings_ms": {
         "embed": 0.0,
         "retrieve": 0.1,
-        "llm": 3946.0,
-        "total": 3946.1
+        "llm": 3466.0,
+        "total": 3466.1
       },
       "server_timings": {
         "prompt_n": 4,
-        "prompt_ms": 78.531,
-        "predicted_n": 165,
-        "predicted_ms": 1493.758
+        "prompt_ms": 89.371,
+        "predicted_n": 104,
+        "predicted_ms": 1013.905
       }
     }
   ]
