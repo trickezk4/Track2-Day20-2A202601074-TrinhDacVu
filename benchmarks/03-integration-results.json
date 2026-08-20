@@ -1,0 +1,104 @@
+{
+  "backend": "keyword overlap",
+  "mean_ms": {
+    "embed": 0.0,
+    "retrieve": 0.1,
+    "llm": 3538.3,
+    "total": 3538.6
+  },
+  "results": [
+    {
+      "query": "Why is goodput more useful than raw throughput?",
+      "answer": "Based on the provided context, **Goodput** is more useful than raw throughput because it focuses on **SLOs (Service Level Objects)** by counting only requests that met their targets, whereas **Raw Throughput** ignores SLOs and only considers requests per second at saturation.\n\nThis distinction highlights that Goodput is designed to be more efficient and reliable for applications where the goal is to meet specific performance or reliability targets (SLOs) rather than maximizing instantaneous capacity.",
+      "contexts": [
+        {
+          "id": "goodput",
+          "score": 1.0
+        },
+        {
+          "id": "paged",
+          "score": 0.0
+        },
+        {
+          "id": "radix",
+          "score": 0.0
+        }
+      ],
+      "embed_backend": "keyword overlap",
+      "timings_ms": {
+        "embed": 0.0,
+        "retrieve": 0.1,
+        "llm": 3708.3,
+        "total": 3709.1
+      },
+      "server_timings": {
+        "prompt_n": 4,
+        "prompt_ms": 185.902,
+        "predicted_n": 97,
+        "predicted_ms": 838.64
+      }
+    },
+    {
+      "query": "What problem does PagedAttention actually solve?",
+      "answer": "PagedAttention solves the problem of **internal fragmentation** in GPU memory.\n\nBy storing the KV cache in non-contiguous pages, it prevents the wasted space that would otherwise be occupied by the internal fragmentation of contiguous memory blocks.",
+      "contexts": [
+        {
+          "id": "paged",
+          "score": 1.0
+        },
+        {
+          "id": "radix",
+          "score": 0.0
+        },
+        {
+          "id": "disagg",
+          "score": 0.0
+        }
+      ],
+      "embed_backend": "keyword overlap",
+      "timings_ms": {
+        "embed": 0.0,
+        "retrieve": 0.1,
+        "llm": 2960.5,
+        "total": 2960.7
+      },
+      "server_timings": {
+        "prompt_n": 4,
+        "prompt_ms": 87.721,
+        "predicted_n": 47,
+        "predicted_ms": 478.427
+      }
+    },
+    {
+      "query": "When does splitting prefill and decode help?",
+      "answer": "Splitting prefill and decode helps when **prefill is compute-bound and decode is memory-bound**, specifically to avoid the overhead of maintaining a large shared KV cache.\n\nAccording to the context, this optimization occurs because:\n1.  **Prefill** is compute-bound (requires significant processing power).\n2.  **Decode** is memory-bound (requires significant bandwidth).\n3.  **RadixAttention** uses a trie-based caching mechanism where keys are cached by token prefix. This allows the engine to skip the prefill step entirely for tokens that share a prefix.\n\nBy splitting these operations, the system can process compute-bound tasks first (prefill) and then handle memory-bound tasks (decode) in separate pools, effectively bypassing the shared cache that would otherwise be required for a full batch.",
+      "contexts": [
+        {
+          "id": "disagg",
+          "score": 2.0
+        },
+        {
+          "id": "radix",
+          "score": 1.0
+        },
+        {
+          "id": "batching",
+          "score": 1.0
+        }
+      ],
+      "embed_backend": "keyword overlap",
+      "timings_ms": {
+        "embed": 0.0,
+        "retrieve": 0.1,
+        "llm": 3946.0,
+        "total": 3946.1
+      },
+      "server_timings": {
+        "prompt_n": 4,
+        "prompt_ms": 78.531,
+        "predicted_n": 165,
+        "predicted_ms": 1493.758
+      }
+    }
+  ]
+}

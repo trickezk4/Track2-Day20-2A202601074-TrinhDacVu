@@ -42,7 +42,7 @@ REQUIRED_END = re.compile(r"^##\s*6(?:[.)]|\s)", re.MULTILINE)
 # Every generated report ends with a section the student must replace.
 UNANSWERED = re.compile(r"required -- replace this line", re.IGNORECASE)
 
-OK, WARN, BAD = "  ✓", "  •", "  ✗"
+OK, WARN, BAD = "  [OK]", "  [WARN]", "  [FAIL]"
 
 
 def tracked_files() -> set[str] | None:
@@ -102,7 +102,7 @@ def need_file(r: Report, path: pathlib.Path, label: str, how: str) -> pathlib.Pa
     if path.stat().st_size == 0:
         r.fail(f"{label}: {rel} is empty — run `{how}`")
         return None
-    if path.suffix == ".md" and UNANSWERED.search(path.read_text()):
+    if path.suffix == ".md" and UNANSWERED.search(path.read_text(encoding="utf-8")):
         r.fail(f"{label}: {rel} still has an unanswered 'replace this line' section")
         return None
     if is_committed(path) is False:
@@ -118,7 +118,7 @@ def any_file(r: Report, patterns: list[str], label: str, how: str) -> bool:
     if not hits:
         r.fail(f"{label}: none of {patterns} found — run `{how}`")
         return False
-    stale = [p for p in hits if p.suffix == ".md" and UNANSWERED.search(p.read_text())]
+    stale = [p for p in hits if p.suffix == ".md" and UNANSWERED.search(p.read_text(encoding="utf-8"))]
     if stale and len(stale) == len([p for p in hits if p.suffix == ".md"]):
         r.fail(f"{label}: {stale[0].relative_to(root)} still has an unanswered section")
         return False
@@ -159,7 +159,7 @@ def check_manifest(r: Report) -> None:
         r.fail("Model manifest: models/active.json is missing — run `make setup`")
         return
     try:
-        cfg = json.loads(path.read_text())
+        cfg = json.loads(path.read_text(encoding="utf-8"))
     except ValueError as exc:
         r.fail(f"Model manifest: models/active.json is not valid JSON — {exc}")
         return
@@ -184,7 +184,7 @@ def check_reflection(r: Report) -> None:
     if not path.exists():
         r.fail("Reflection: submission/REFLECTION.md is missing")
         return
-    text = path.read_text()
+    text = path.read_text(encoding="utf-8")
     end = REQUIRED_END.search(text)
     required = text[: end.start()] if end else text
     hits = [
@@ -283,13 +283,13 @@ def main() -> int:
 
     print()
     if r.problems:
-        print(f"✗ Not ready — {len(r.problems)} item(s) to fix:\n")
+        print(f"[FAIL] Not ready - {len(r.problems)} item(s) to fix:\n")
         for p in r.problems:
             print(f"  - {p}")
         print("\nSee rubric.md for what each item is worth. Re-run `make verify` when fixed.")
         return 1
 
-    print("✓ All checks passed.")
+    print("[PASS] All checks passed.")
     if r.notes:
         print(f"  ({len(r.notes)} informational note(s) above — none block submission.)")
     print()

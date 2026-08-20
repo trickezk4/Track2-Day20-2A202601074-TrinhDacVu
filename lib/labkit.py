@@ -510,9 +510,9 @@ def run_bench(args: list[str], timeout: int = 1800) -> str:
 
 def write_report(filename: str, markdown: str, data: object | None = None) -> Path:
     out = bench_dir() / filename
-    out.write_text(markdown)
+    out.write_text(markdown, encoding="utf-8")
     if data is not None:
-        out.with_suffix(".json").write_text(json.dumps(data, indent=2))
+        out.with_suffix(".json").write_text(json.dumps(data, indent=2), encoding="utf-8")
     return out
 
 
@@ -534,7 +534,7 @@ def die(*lines: str) -> None:
 
 
 def banner(title: str) -> None:
-    print(f"\n{'─' * 64}\n  {title}\n{'─' * 64}")
+    print(f"\n{'-' * 64}\n  {title}\n{'-' * 64}")
 
 
 def host_tag() -> str:

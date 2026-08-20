@@ -1,4 +1,4 @@
-<#
+﻿<#
   Windows runner — the equivalent of `make <target>` for students without make.
 
   Works in Windows PowerShell 5.1 (powershell.exe) and PowerShell 7+ (pwsh).
@@ -130,7 +130,7 @@ switch ($Target) {
         if (-not (Test-Path 'bonus\llama.cpp')) {
             git clone --depth 1 --branch $build https://github.com/ggml-org/llama.cpp bonus\llama.cpp
         }
-        $flags = if ($env:LLAMA_CMAKE_FLAGS) { $env:LLAMA_CMAKE_FLAGS -split ' ' } else { @() }
+        $flags = $(if ($env:LLAMA_CMAKE_FLAGS) { $env:LLAMA_CMAKE_FLAGS -split ' ' } else { @() })
         cmake -B bonus\llama.cpp\build -S bonus\llama.cpp @flags -DGGML_NATIVE=ON -DCMAKE_BUILD_TYPE=Release
         cmake --build bonus\llama.cpp\build -j --config Release
         Write-Host ""
