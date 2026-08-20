@@ -6,9 +6,9 @@
 >
 > `make verify` sẽ fail nếu còn placeholder chưa điền. Đó là cố ý.
 
-**Họ Tên:** Trịnh Đắc Vũ
-**Cohort:** A20
-**Ngày submit:** 2026-08-20
+**Họ Tên:** Trịnh Đắc Vụ
+**Cohort:** A20-K4
+**Ngày submit:** 20/08/2026
 
 ---
 
@@ -113,47 +113,56 @@ speedup: 1.23x
 > Bỏ trống nếu không làm. Xem `bonus/README.md`. Đừng làm hết — **một** finding sâu
 > ăn điểm hơn năm bảng nông.
 
-**Đã làm:** _<B1 build-compare / B2 sweep nào / B4 challenge nào / B5 lựa chọn nào>_
+**Đã làm:** B2 (sweep-gpu) + B5 (C8 Semantic Cache)
 
 **Numbers:**
 
+- **B2 (GPU offload sweep):**
+
 ```
-before:  <số>
-after:   <số>
-speedup: <X.Y>×
+before:  7.1 tok/s (-ngl 0, CPU-only)
+after:   130.1 tok/s (-ngl 99, GPU full offload)
+speedup: 18.35x
+```
+
+- **B5 (C8 Semantic Cache):**
+
+```
+before:  8 LLM calls (32.4s latency)
+after:   1 LLM call  (4.05s latency)
+speedup: 8.0x (7/8 hits, 87% LLM calls saved)
 ```
 
 **Điều này nói lên gì mà deck chưa nói:**
 
-_(để trống nếu bạn không làm phần này)_
+1. **Về B2 (GPU offload sweep):** Sự cải thiện tốc độ (18.35x) từ 7.1 lên 130.1 tok/s cho thấy GPU CUDA (GTX 1650 Ti) có sức mạnh tính toán vượt trội hơn hẳn CPU trong các phép toán giải mã (decode). Đồ thị tăng tốc tuyến tính và đi ngang hoàn toàn từ `-ngl 32` đến `-ngl 99` chứng minh rằng mô hình Qwen3.5 0.8B (chỉ có 28 layers) đã được nạp trọn vẹn lên VRAM của GPU. Khi được offload 100%, hệ thống tránh được việc trung chuyển dữ liệu ma trận qua băng thông PCIe vốn là nút thắt cổ chai lớn giữa CPU và GPU.
+2. **Về B5 (C8 Semantic Cache):** Thực nghiệm cho thấy rủi ro lớn nhất của Semantic Cache là hiện tượng **False Hit** khi sử dụng các mô hình nhỏ (Qwen3.5 0.8B) ở chế độ pooling (`serve-embed`) làm embedder. Với ngưỡng threshold mặc định `0.80`, câu hỏi không liên quan như *"Explain TTFT and TPOT."* vẫn bị so khớp nhầm (similarity = 0.86) vào câu trả lời của *"What is goodput at SLO?"*. Điều này xảy ra do biểu diễn vector (sentence embeddings) của chat model rất yếu (weak embedder), khiến các câu hỏi bị co cụm trong dải độ tương đồng hẹp (0.85 - 0.89). Nếu nâng threshold lên `0.90` để tránh False Hit, toàn bộ các paraphrase đúng cũng bị coi là **False Miss** (tỉ lệ hit rate về 0%). Kết luận rút ra là semantic cache bắt buộc phải đi kèm với một embedding model chuyên dụng (như BGE-M3 hay Qwen3-Embedding) để phân tách rõ ràng ranh giới giữa các câu hỏi khác nghĩa.
 
 ---
 
 ## 7. Điều làm bạn ngạc nhiên nhất  *(optional)*
 
-_(1–2 câu. Không bắt buộc, nhưng grader đọc hết.)_
-
-_(để trống nếu bạn không làm phần này)_
+Gemma 4 nặng hơn dự kiến nên không chạy được.
 
 ---
 
 ## 8. Self-check trước khi push
 
-- [ ] `hardware.json` committed
-- [ ] `models/active.json` committed
-- [ ] `benchmarks/01-quickstart-results.md` committed (`make bench`)
-- [ ] `benchmarks/01-tuning-tg128.md` committed (`make tune`)
-- [ ] `benchmarks/02-server-results.md` committed (`make load-report`)
-- [ ] `benchmarks/02-server-batching-u50.md` hoặc `-metrics-u50.csv` committed (`make metrics`)
-- [ ] `benchmarks/locust-10_stats.csv` + `locust-50_stats.csv` committed (`make load-10` / `load-50`)
-- [ ] `benchmarks/03-integration-results.md` committed (`make pipeline`)
-- [ ] Mọi section **"required — replace this line"** trong các file `benchmarks/*.md`
+- [X] `hardware.json` committed
+- [X] `models/active.json` committed
+- [X] `benchmarks/01-quickstart-results.md` committed (`make bench`)
+- [X] `benchmarks/01-tuning-tg128.md` committed (`make tune`)
+- [X] `benchmarks/02-server-results.md` committed (`make load-report`)
+- [X] `benchmarks/02-server-batching-u50.md` hoặc `-metrics-u50.csv` committed (`make metrics`)
+- [X] `benchmarks/locust-10_stats.csv` + `locust-50_stats.csv` committed (`make load-10` / `load-50`)
+- [X] `benchmarks/03-integration-results.md` committed (`make pipeline`)
+- [X] Mọi section **"required — replace this line"** trong các file `benchmarks/*.md`
   đã được thay bằng nhận xét của bạn
-- [ ] 5 screenshots trong `submission/screenshots/`
-- [ ] `make verify` → **exit 0**
-- [ ] Repo GitHub ở chế độ **public**
-- [ ] Đã paste public URL vào VinUni LMS
-- [ ] **Không** commit `models/*.gguf` hay `runtime/` (đã có trong `.gitignore`)
+- [X] 5 screenshots trong `submission/screenshots/`
+- [X] `make verify` → **exit 0**
+- [X] Repo GitHub ở chế độ **public**
+- [X] Đã paste public URL vào VinUni LMS
+- [X] **Không** commit `models/*.gguf` hay `runtime/` (đã có trong `.gitignore`)
 
 **Quan trọng:** repo phải **public** đến khi điểm được công bố. Private → grader không
 xem được → 0 điểm.
